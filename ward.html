@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <title>WeDoTech - eThekwini Ward Profile</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.24/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.24/"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+      rel="stylesheet" />
+    <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="loading_indicator.css" />
+
+    <style>
+      html,
+      body {
+        background-color: transparent;
+      }
+
+      .loading-indicator {
+        position: absolute;
+        left: 40%;
+        top: 40%;
+      }
+
+      /* esri components customization */
+      .esri-ui-corner .esri-component {
+        width: 50px;
+        height: 100px;
+        border: 3px solid blue;
+        border-radius: 10px;
+        margin-left: 0;
+        padding: 1px;
+        background: #f3f3f3;
+      }
+
+      .esri-zoom .esri-widget--button {
+        width: 42px;
+        height: 50px;
+        background-color: transparent;
+      }
+
+      .esri-view .esri-view-surface--inset-outline:focus::after {
+        outline: none;
+      }
+
+      /* local styles */
+      .card {
+        display: flex;
+        flex-direction: column;
+        min-height: 100%;
+        width: 100%;
+        background-color: #ffffff;
+        border: 1px solid transparent;
+        border-radius: 30px;
+        padding: 20px;
+      }
+
+      .row {
+        flex-wrap: nowrap;
+      }
+
+      .col {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+      }
+
+      .col.section {
+        margin: 5px 10px;
+      }
+
+      .view-container {
+        padding: 0;
+        margin: 0;
+        flex-grow: 1;
+        flex-shrink: 0;
+        border-radius: 30px;
+        border: 1px solid transparent;
+        overflow: hidden;
+        min-height: 500px;
+      }
+
+      .ward-details {
+        padding: 10px 10px;
+        position: relative;
+      }
+
+      .ward-councillor-row-lg {
+        display: none;
+      }
+
+      .ward-councillor-image {
+        flex-grow: 0;
+        flex-shrink: 0;
+        border: 4px solid transparent;
+        border-radius: 50%;
+        overflow: hidden;
+        width: 100px;
+        height: 110px;
+        position: relative;
+        border-top-width: 2px;
+        border-bottom-width: 2px;
+        border-top-color: rgb(19, 115, 218);
+        border-left-color: rgb(19, 115, 218);
+        border-right-color: rgb(254, 205, 0);
+        border-bottom-color: rgb(254, 205, 0);
+      }
+
+      .ward-councillor-image img {
+        width: 100%;
+        height: 100%;
+        line-height: 180px;
+        font-size: 20px;
+      }
+
+      .ward-councillor-right {
+        margin: auto 0 auto 10px;
+      }
+
+      .ward-councillor-title {
+        font-size: 32px;
+        font-weight: 600;
+        color: rgb(254, 205, 0);
+      }
+
+      .ward-councillor-value {
+        font-size: 24px;
+        line-height: 24px;
+        font-weight: 400;
+        color: rgb(88, 88, 88);
+      }
+
+      .ward-details-info {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        font-size: 24px;
+        text-align: center;
+        color: #000;
+        opacity: 0.5;
+      }
+
+      .ward-number-title {
+        font-size: 60px;
+        font-weight: 400;
+        color: rgb(19, 115, 218);
+      }
+
+      .ward-number-value {
+        font-size: 60px;
+        font-weight: 400;
+        color: rgb(19, 115, 218);
+        margin-left: 10px;
+        cursor: pointer;
+        text-decoration: underline;
+        text-decoration-thickness: 3px;
+      }
+
+      .ward-section-header {
+        color: rgb(19, 115, 218);
+        font-weight: 600;
+        font-size: 28px;
+        margin: 10px 0;
+      }
+
+      .ward-section-info {
+        font-size: 20px;
+        font-weight: 600;
+        color: rgb(85, 85, 85);
+        margin: 5px 0;
+      }
+
+      .ward-population-container {
+        margin: 5px 0;
+      }
+
+      .ward-population-title {
+        font-weight: 400;
+        font-size: 16px;
+        margin: 2px 0;
+      }
+
+      .ward-population-value {
+        font-weight: 600;
+        font-size: 20px;
+      }
+
+      @media (min-width: 768px) {
+        .ward-councillor-right {
+          margin: auto 0 auto 30px;
+        }
+
+        .ward-councillor-value {
+          font-size: 32px;
+          line-height: 32px;
+        }
+      }
+
+      @media (min-width: 1000px) {
+        .view-container {
+          height: auto;
+          flex-grow: 1;
+          flex-shrink: 1;
+        }
+
+        .card {
+          flex-direction: row;
+        }
+
+        .ward-details {
+          width: 50%;
+          padding: 10px 30px;
+        }
+
+        .ward-councillor-right {
+          margin-left: 40px;
+        }
+
+        .ward-councillor-row-sm {
+          display: none;
+        }
+
+        .ward-councillor-row-lg {
+          display: block;
+        }
+
+        .ward-councillor-image {
+          width: 190px;
+          height: 200px;
+        }
+
+        .ward-number-title,
+        .ward-number-value {
+          font-size: 72px;
+          text-decoration-thickness: 5px;
+        }
+      }
+
+      .ward-selection-popup {
+        position: relative;
+        left: -60px;
+      }
+
+      .ward-selection-container {
+        position: absolute;
+        display: flex;
+        flex-wrap: wrap;
+        width: 330px;
+        background-color: rgb(19, 115, 218);
+        padding: 3px;
+      }
+
+      .ward-selection-item {
+        font-size: 14px;
+        padding: 0 5px;
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        align-items: center;
+        color: #fff;
+        display: flex;
+        justify-content: end;
+        font-family: sans-serif;
+        font-weight: 600;
+      }
+
+      .ward-selection-item:hover {
+        background-color: rgb(254, 205, 0);
+      }
+
+      .ward-budget-value {
+        font-weight: 600;
+      }
+    </style>
+
+    <script>
+      const WARDS_LOCATION = {
+        1: { latitude: -29.684457038905514, longitude: 30.63803720397964 },
+        2: { latitude: -29.63954849512876, longitude: 30.760319112968535 },
+        3: { latitude: -29.630265021403346, longitude: 30.909803985786457 },
+        4: { latitude: -29.733263114917573, longitude: 30.659183739853045 },
+        5: { latitude: -29.77476803349519, longitude: 30.60922491474168 },
+        6: { latitude: -29.828802963287394, longitude: 30.63761341495529 },
+        7: { latitude: -29.826727384462433, longitude: 30.743448018264868 },
+        8: { latitude: -29.713631713640357, longitude: 30.8171765796662 },
+        9: { latitude: -29.727477514917688, longitude: 30.860708831977885 },
+        10: { latitude: -29.774637658963673, longitude: 30.83728778285986 },
+        11: { latitude: -29.782938220185724, longitude: 30.989603727293126 },
+        12: { latitude: -29.846825179110485, longitude: 30.76081800384531 },
+        13: { latitude: -29.87333374812946, longitude: 30.814826964569157 },
+        14: { latitude: -29.85869396107444, longitude: 30.792156933975296 },
+        15: { latitude: -29.82150567041884, longitude: 30.817246317100587 },
+        16: { latitude: -29.83604388277639, longitude: 30.845554351043752 },
+        17: { latitude: -29.873994278908732, longitude: 30.850795387458852 },
+        18: { latitude: -29.804959133416503, longitude: 30.854142784309435 },
+        19: { latitude: -29.77382747057052, longitude: 30.899895905685447 },
+        20: { latitude: -29.772095321675902, longitude: 30.91836023254396 },
+        21: { latitude: -29.799512838878428, longitude: 30.868138550949134 },
+        22: { latitude: -29.787488046518483, longitude: 30.898898123931907 },
+        23: { latitude: -29.80551072876193, longitude: 30.928836940956124 },
+        24: { latitude: -29.84531879904247, longitude: 30.913685142231188 },
+        25: { latitude: -29.80790559479692, longitude: 30.97119706792834 },
+        26: { latitude: -29.844216044632958, longitude: 31.021420090627732 },
+        27: { latitude: -29.830210702416437, longitude: 31.009273707103773 },
+        28: { latitude: -29.8549127137964, longitude: 31.017235844564503 },
+        29: { latitude: -29.846677450178092, longitude: 30.95139431877152 },
+        30: { latitude: -29.828044404724338, longitude: 30.94773042125704 },
+        31: { latitude: -29.851864117005245, longitude: 30.997233270835917 },
+        32: { latitude: -29.902597576038566, longitude: 30.99581170005796 },
+        33: { latitude: -29.887301646668227, longitude: 30.976961135101305 },
+        34: { latitude: -29.788705488638207, longitude: 31.014333694410396 },
+        35: { latitude: -29.705370842576258, longitude: 31.078235983085566 },
+        36: { latitude: -29.795015931206958, longitude: 31.032802044582414 },
+        37: { latitude: -29.788353991573448, longitude: 30.95614182872774 },
+        38: { latitude: -29.750969542296275, longitude: 30.947110830974598 },
+        39: { latitude: -29.744707558035184, longitude: 31.002443461847196 },
+        40: { latitude: -29.75506092876114, longitude: 30.985586448740854 },
+        41: { latitude: -29.758306907117248, longitude: 30.959432899189142 },
+        42: { latitude: -29.72267921998593, longitude: 30.960170506668085 },
+        43: { latitude: -29.735699302364086, longitude: 30.94096589012146 },
+        44: { latitude: -29.70308768446173, longitude: 30.921380399894723 },
+        45: { latitude: -29.74163813470814, longitude: 30.961677908134483 },
+        46: { latitude: -29.732698311578247, longitude: 30.992513924074256 },
+        47: { latitude: -29.73553044806786, longitude: 30.981263398361307 },
+        48: { latitude: -29.71342205526807, longitude: 31.023454546165425 },
+        49: { latitude: -29.702253619880604, longitude: 31.01502704544064 },
+        50: { latitude: -29.684261300932317, longitude: 31.02145898265835 },
+        51: { latitude: -29.683212698156677, longitude: 31.00424992961881 },
+        52: { latitude: -29.70055285220696, longitude: 30.985233067703234 },
+        53: { latitude: -29.668987903607672, longitude: 30.991015910339332 },
+        54: { latitude: -29.7143352307567, longitude: 30.971725463104235 },
+        55: { latitude: -29.706698778013653, longitude: 30.954441308212274 },
+        56: { latitude: -29.685151439592804, longitude: 30.939168810081483 },
+        57: { latitude: -29.69061326966388, longitude: 30.96668291015624 },
+        58: { latitude: -29.6033702924927, longitude: 31.133902548980625 },
+        59: { latitude: -29.599200430794053, longitude: 30.969874738883963 },
+        60: { latitude: -29.58192678533129, longitude: 31.0338776103973 },
+        61: { latitude: -29.562177189743547, longitude: 31.08225929660791 },
+        62: { latitude: -29.540608254888387, longitude: 31.14463138504019 },
+        63: { latitude: -29.888255094872353, longitude: 30.88931190891269 },
+        64: { latitude: -29.904583223808793, longitude: 30.941373585891725 },
+        65: { latitude: -29.900065468955816, longitude: 30.96485364360812 },
+        66: { latitude: -29.9253813189331, longitude: 31.013047575187652 },
+        67: { latitude: -30.013711955890198, longitude: 30.847548573446357 },
+        68: { latitude: -29.945147802958015, longitude: 30.979509233665453 },
+        69: { latitude: -29.924065583382237, longitude: 30.9193043701172 },
+        70: { latitude: -29.93072776856213, longitude: 30.900823950004607 },
+        71: { latitude: -29.90302540044868, longitude: 30.883110641670253 },
+        72: { latitude: -29.899881778243497, longitude: 30.84676134510045 },
+        73: { latitude: -29.914510868975952, longitude: 30.874463199806243 },
+        74: { latitude: -29.94144304844481, longitude: 30.94101148767473 },
+        75: { latitude: -29.93182724194499, longitude: 30.9764300577164 },
+        76: { latitude: -29.959142891263213, longitude: 30.935680546509822 },
+        77: { latitude: -29.909093798837578, longitude: 30.862843870353746 },
+        78: { latitude: -29.970514922405094, longitude: 30.85454511566167 },
+        79: { latitude: -29.94533838258252, longitude: 30.899338006210346 },
+        80: { latitude: -29.94577531985539, longitude: 30.91816711349489 },
+        81: { latitude: -29.94835506994722, longitude: 30.894805072975185 },
+        82: { latitude: -29.963855402124775, longitude: 30.88880765361789 },
+        83: { latitude: -29.959654129662997, longitude: 30.869774647700467 },
+        84: { latitude: -29.974210461516524, longitude: 30.86189839167607 },
+        85: { latitude: -29.96813557770745, longitude: 30.882343529891997 },
+        86: { latitude: -30.000800717316398, longitude: 30.88668717670433 },
+        87: { latitude: -29.981077223666404, longitude: 30.895695566368133 },
+        88: { latitude: -29.968920953643444, longitude: 30.911579608154312 },
+        89: { latitude: -29.972861681184927, longitude: 30.90977179927828 },
+        90: { latitude: -29.990764928516004, longitude: 30.944522499275205 },
+        91: { latitude: -29.808398990587627, longitude: 30.630516289901887 },
+        92: { latitude: -29.80456347243438, longitude: 30.90610253734591 },
+        93: { latitude: -30.015837057339922, longitude: 30.91163325233461 },
+        94: { latitude: -30.014296094542374, longitude: 30.869097249984687 },
+        95: { latitude: -29.987665895060243, longitude: 30.8369712821961 },
+        96: { latitude: -30.013022159073973, longitude: 30.708976268005486 },
+        97: { latitude: -30.064913061310026, longitude: 30.870472072792094 },
+        98: { latitude: -30.15345110503745, longitude: 30.80709683818824 },
+        99: { latitude: -30.190849052286364, longitude: 30.730160354805097 },
+        100: { latitude: -29.86592806140153, longitude: 30.646915315818934 },
+        101: { latitude: -29.873487252151342, longitude: 30.969555556011226 },
+        102: { latitude: -29.660448331788547, longitude: 31.02603483123776 },
+        103: { latitude: -29.81454063349567, longitude: 30.724352031183372 },
+        104: { latitude: -29.74272222477141, longitude: 30.97968760056507 },
+        105: { latitude: -30.082056995289424, longitude: 30.670996188354625 },
+        106: { latitude: -29.652486112982203, longitude: 31.039150833320576 },
+        107: { latitude: -29.7183372641313, longitude: 30.960143684577965 },
+        108: { latitude: -29.687556172683323, longitude: 30.90187001152041 },
+        109: { latitude: -30.104247315154176, longitude: 30.836965917778066 },
+        110: { latitude: -29.743559446348442, longitude: 31.027645497751273 },
+        111: { latitude: -29.957042060535958, longitude: 30.8334951393128 },
+      };
+
+      const randomWardNo = Math.floor(Math.random() * (112 - 1)) + 1;
+      let randomWardLoaded = false;
+      let randomWardInterval = null;
+      let randomWardTryCount = 0;
+      let showWardNo = () => {};
+
+      function formatNumber(value) {
+        if (!value && value != 0) {
+          return "N/A";
+        }
+        const splits = value.toString().split(".");
+        const part1 = splits[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        let part2 = "";
+        if (splits.length > 1) {
+          part2 = "." + splits[1];
+        }
+        return part1 + part2;
+      }
+
+      function formatAmount(amount) {
+        return `R ${formatNumber(amount)}`;
+      }
+
+      require([
+        "esri/WebMap",
+        "esri/layers/FeatureLayer",
+        "esri/views/MapView",
+        "esri/widgets/Feature",
+        "esri/core/promiseUtils",
+        "esri/geometry/Point",
+      ], (WebMap, FeatureLayer, MapView, Feature, promiseUtils, Point) => {
+        const fLayer = new FeatureLayer({
+          portalItem: {
+            id: "675366b4b0fe4b68aa4302f1453889c7",
+          },
+          layerId: 0,
+          outFields: ["*"],
+        });
+
+        const map = new WebMap({
+          portalItem: {
+            id: "7252ef2a4ecb4465824e373f2a0a136d",
+          },
+          layers: [fLayer],
+        });
+
+        const view = new MapView({
+          container: "viewContainer",
+          map: map,
+          center: [30.95295, -29.8536228],
+          zoom: 9,
+          navigation: {
+            mouseWheelZoomEnabled: false,
+          },
+          highlightOptions: {
+            color: [19, 115, 218],
+            haloOpacity: 1,
+            fillOpacity: 0.85,
+          },
+          popup: {
+            autoOpenEnabled: false,
+          },
+        });
+
+        view.ui.move(["zoom"], "bottom-right");
+
+        view.when().then(() => {
+          // Create a default graphic for when the application starts
+          const graphic = {};
+
+          const feature = new Feature({
+            graphic: graphic,
+            map: view.map,
+            spatialReference: view.spatialReference,
+          });
+
+          view.whenLayerView(fLayer).then((layerView) => {
+            let highlight;
+            let objectId;
+
+            const initRandomWard = () => {
+              // No need to try loading indefinitely
+              if (!randomWardLoaded && randomWardTryCount < 10) {
+                setTimeout(() => {
+                  randomWardTryCount += 1;
+                  loadWardNo(randomWardNo);
+                  initRandomWard();
+                }, 1000);
+              }
+            };
+
+            const loadWardNo = (showWardNo = (wardNo) => {
+              const mapPoint = new Point({
+                latitude: WARDS_LOCATION[wardNo].latitude,
+                longitude: WARDS_LOCATION[wardNo].longitude,
+              });
+
+              const screenPoint = view.toScreen(mapPoint);
+              debouncedUpdate(screenPoint);
+            });
+
+            fLayer.when().then(() => {
+              initRandomWard();
+            });
+
+            const debouncedUpdate = promiseUtils.debounce((event) => {
+              // Perform a hitTest on the View
+              view.hitTest(event).then((event) => {
+                // Make sure graphic has a popupTemplate
+                const results = event.results.filter((result) => {
+                  return result.graphic.layer.popupTemplate;
+                });
+
+                const result = results[0];
+                const newObjectId = result && result.graphic.attributes["OBJECTID"];
+
+                if (!newObjectId) {
+                  return;
+                }
+
+                if (objectId !== newObjectId) {
+                  highlight && highlight.remove();
+                  objectId = newObjectId;
+                  highlight = layerView.highlight(result.graphic);
+                  loadCouncillorDetails(newObjectId, event);
+                }
+              });
+            });
+
+            view.on("click", (event) => {
+              debouncedUpdate(event).catch((err) => {
+                if (!promiseUtils.isAbortError(err)) {
+                  throw err;
+                }
+              });
+            });
+          });
+        });
+      });
+
+      function loadCouncillorDetails(id, event) {
+        const url =
+          "https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourCouncillor/FeatureServer/0/query?f=json&objectIds=" +
+          id +
+          "&outFields=Black_African%2CColoured%2CFirst_Name%2CImageLink%2CIndian_or_Asian%2CSurname%2CWardNo%2CWhite%2CProjects_Count%2CBudget_Amount%2CProjects_Count%2CPop_Percentage%2CBudget_Percentage%2COBJECTID&outSR=102100&returnGeometry=false&spatialRel=esriSpatialRelIntersects";
+        const loadingIndicatorEl = document.getElementById("loadingIndicator");
+        const wardDetailsEl = document.getElementById("wardDetails");
+
+        loadingIndicatorEl.classList.remove("hidden");
+
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            try {
+              const data = JSON.parse(this.responseText);
+              const attributes = data.features[0].attributes;
+              let firstName = attributes.First_Name;
+              let surname = attributes.Surname;
+              if (!firstName || firstName == "null") {
+                firstName = "N/A";
+              }
+
+              if (!surname || surname == "null") {
+                surname = "";
+              }
+
+              const valueElements = document.getElementsByClassName("ward-councillor-value");
+
+              for (let i = 0; i < valueElements.length; i++) {
+                valueElements[i].textContent = firstName + " " + surname;
+              }
+
+              document.getElementById("wardNumberValue").textContent = attributes.WardNo;
+              document.getElementById("wardCouncillorImg").src = attributes.ImageLink;
+              document.getElementById("wardAfricanValue").textContent = formatNumber(
+                attributes.Black_African
+              );
+              document.getElementById("wardIndianValue").textContent = formatNumber(
+                attributes.Indian_or_Asian
+              );
+              document.getElementById("wardColouredValue").textContent = formatNumber(
+                attributes.Coloured
+              );
+              document.getElementById("wardWhiteValue").textContent = formatNumber(
+                attributes.White
+              );
+              document.getElementById("wardPopulation").textContent = formatNumber(
+                attributes.Pop_Percentage
+              );
+              document.getElementById("wardBudgetPercValue").textContent = formatNumber(
+                attributes.Budget_Percentage
+              );
+              document.getElementById("wardBudgetValue").textContent = formatAmount(
+                attributes.Budget_Amount
+              );
+              document.getElementById("wardProjectsValue").textContent = formatNumber(
+                attributes.Projects_Count
+              );
+
+              if (attributes.WardNo == randomWardNo) {
+                randomWardLoaded = true;
+              }
+
+              loadingIndicatorEl.classList.add("hidden");
+              wardDetailsEl.classList.remove("hidden");
+            } catch (error) {
+              console.error("Error retrieving councillor details", error);
+            }
+          }
+        };
+        xhttp.open("GET", url);
+        xhttp.send();
+      }
+
+      function initWardSelectionPopup() {
+        let htmlContent = "";
+        for (let i = 1; i <= 111; i++) {
+          htmlContent += `<div class="ward-selection-item" onclick="showWardNo(${i})">${i}</div>`;
+        }
+
+        htmlContent = `<div class="ward-selection-container">${htmlContent}</div>`;
+        document.getElementById("wardSelectionPopup").innerHTML = htmlContent;
+      }
+
+      function showWardSelectionPopup() {
+        document.getElementById("wardSelectionPopup").classList.remove("hidden");
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        initWardSelectionPopup();
+      });
+
+      document.addEventListener("click", function (event) {
+        if (event.target && event.target.id == "wardNumberValue") {
+          return;
+        }
+        document.getElementById("wardSelectionPopup").classList.add("hidden");
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="card">
+      <div id="viewContainer" class="view-container"></div>
+      <div class="ward-details">
+        <div id="loadingIndicator" class="loading-indicator">
+          <div class="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+        <div id="wardDetails" class="ward-details-data hidden">
+          <div class="row">
+            <div class="ward-councillor-image">
+              <div class="ward-councillor-image-ring-1"></div>
+              <div class="ward-councillor-image-ring-2"></div>
+              <img id="wardCouncillorImg" src="" alt="Ward Councillor" />
+            </div>
+            <div class="col ward-councillor-right">
+              <div class="row">
+                <div class="ward-number-container">
+                  <span class="ward-number-title">Ward</span
+                  ><span
+                    id="wardNumberValue"
+                    class="ward-number-value"
+                    onclick="showWardSelectionPopup()"></span>
+                  <div id="wardSelectionPopup" class="ward-selection-popup hidden"></div>
+                </div>
+              </div>
+              <div class="row ward-councillor-row-lg">
+                <div class="ward-councillor-container">
+                  <div class="ward-councillor-title">Councillor</div>
+                  <div id="wardCouncillorValue" class="ward-councillor-value"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row ward-councillor-row-sm">
+            <div class="ward-councillor-container">
+              <div class="ward-councillor-title">Councillor</div>
+              <div id="wardCouncillorValue" class="ward-councillor-value"></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col section">
+              <div class="ward-section-header">Population</div>
+              <div class="ward-section-info">
+                This ward has <span id="wardPopulation"></span>% of the total city population, of
+                which
+              </div>
+              <div class="ward-population-container">
+                <div id="wardAfricanValue" class="ward-population-value">15936</div>
+                <div class="ward-population-title">are African</div>
+              </div>
+              <div class="ward-population-container">
+                <div id="wardIndianValue" class="ward-population-value">9898</div>
+                <div class="ward-population-title">are Indian / Asian</div>
+              </div>
+              <div class="ward-population-container">
+                <div id="wardWhiteValue" class="ward-population-value">7891</div>
+                <div class="ward-population-title">are White</div>
+              </div>
+              <div class="ward-population-container">
+                <div id="wardColouredValue" class="ward-population-value">936</div>
+                <div class="ward-population-title">are Coloured</div>
+              </div>
+            </div>
+            <div class="col section">
+              <div class="row">
+                <div class="col">
+                  <div class="ward-section-header">Budgets</div>
+                  <div class="ward-section-info">
+                    This ward is allocated <span id="wardBudgetPercValue"></span>% of the total
+                    budgets
+                  </div>
+                  <div class="ward-budget-title-container">
+                    <span class="ward-budget-title">Value of </span
+                    ><span id="wardBudgetValue" class="ward-budget-value"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col">
+                  <div class="ward-section-header">Projects ></div>
+                  <div class="ward-section-info">
+                    This ward has <span id="wardProjectsValue"></span> projects
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
