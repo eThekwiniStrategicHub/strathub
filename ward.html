@@ -428,7 +428,7 @@
       ], (WebMap, FeatureLayer, MapView, Feature, promiseUtils, Point) => {
         const fLayer = new FeatureLayer({
           portalItem: {
-            id: "bb8d43643b4d442c83f8427bc055e66d",
+            id: "675366b4b0fe4b68aa4302f1453889c7",
           },
           layerId: 0,
           outFields: ["*"],
@@ -436,7 +436,7 @@
 
         const map = new WebMap({
           portalItem: {
-            id: "4442aad4966843028c55c29dd62cd3c2",
+            id: "7252ef2a4ecb4465824e373f2a0a136d",
           },
           layers: [fLayer],
         });
@@ -537,7 +537,7 @@
 
       function loadCouncillorDetails(id, event) {
         const url =
-          "https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourWardCouncilor/FeatureServer/0/query?f=json&objectIds=" +
+          "https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourCouncillor/FeatureServer/0/query?f=json&objectIds=" +
           id +
           "&outFields=Black_African%2CColoured%2CFirst_Name%2CImageLink%2CIndian_or_Asian%2CSurname%2CWardNo%2CWhite%2CProject_Count%2CBudget_Amount%2CProjects_Count%2CPop_Percentage%2CBudget_Percentage%2COBJECTID&outSR=102100&returnGeometry=false&spatialRel=esriSpatialRelIntersects";
         const loadingIndicatorEl = document.getElementById("loadingIndicator");
