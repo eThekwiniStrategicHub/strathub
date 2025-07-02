@@ -537,7 +537,7 @@
 
       function loadCouncillorDetails(id, event) {
         const url =
-          "https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourWardCouncilor/FeatureServer/0/query?f=json&objectIds=" +
+          "https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourCouncilor/FeatureServer/0/query?f=json&objectIds=" +
           id +
           "&outFields=Black_African%2CColoured%2CFirst_Name%2CImageLink%2CIndian_or_Asian%2CSurname%2CWardNo%2CWhite%2CProjects_Count%2CBudget_Amount%2CProjects_Count%2CPop_Percentage%2CBudget_Percentage%2COBJECTID&outSR=102100&returnGeometry=false&spatialRel=esriSpatialRelIntersects";
         const loadingIndicatorEl = document.getElementById("loadingIndicator");
