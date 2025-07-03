@@ -539,7 +539,7 @@
         const url =
           "https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourWardCouncilor/FeatureServer/0/query?f=json&objectIds=" +
           id +
-          "&outFields=Black_African%2CColoured%2CFirst_Name%2CImageLink%2CIndian_or_Asian%2CSurname%2CWardNo%2CWhite%2CProject_Count%2CBudget_Amount%2CPop_Percentage%2CBudget_Percentage%2COBJECTID&outSR=102100&returnGeometry=false&spatialRel=esriSpatialRelIntersects";
+          "&outFields=Black_African%2CColoured%2CFirst_Name%2CImageLink%2CIndian_or_Asian%2CSurname%2CWardNo%2CWhite%2CProject_Count%2CBudget_Amount%2CPop_Percentage%2CBugdet_Percentage_Rounded%2COBJECTID&outSR=102100&returnGeometry=false&spatialRel=esriSpatialRelIntersects";
         const loadingIndicatorEl = document.getElementById("loadingIndicator");
         const wardDetailsEl = document.getElementById("wardDetails");
 
@@ -585,7 +585,7 @@
                 attributes.Pop_Percentage
               );
               document.getElementById("wardBudgetPercValue").textContent = formatNumber(
-                attributes.Budget_Percentage
+                attributes.Bugdet_Percentage_Rounded
               );
               document.getElementById("wardBudgetValue").textContent = formatAmount(
                 attributes.Budget_Amount
