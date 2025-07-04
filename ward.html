@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no" />
-    <title>eThekwini Ward Profile- Know Your Councillor</title>
+    <title>eThekwini Know Your Councillor</title>
 
     <link rel="stylesheet" href="https://js.arcgis.com/4.24/esri/themes/light/main.css" />
     <script src="https://js.arcgis.com/4.24/"></script>
@@ -428,7 +429,7 @@
       ], (WebMap, FeatureLayer, MapView, Feature, promiseUtils, Point) => {
         const fLayer = new FeatureLayer({
           portalItem: {
-            id: "675366b4b0fe4b68aa4302f1453889c7",
+            id: "bb8d43643b4d442c83f8427bc055e66d",
           },
           layerId: 0,
           outFields: ["*"],
@@ -436,7 +437,7 @@
 
         const map = new WebMap({
           portalItem: {
-            id: "7252ef2a4ecb4465824e373f2a0a136d",
+            id: "4442aad4966843028c55c29dd62cd3c2",
           },
           layers: [fLayer],
         });
@@ -537,9 +538,9 @@
 
       function loadCouncillorDetails(id, event) {
         const url =
-          "https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourCouncillor/FeatureServer/0/query?f=json&objectIds=" +
+          "https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourWardCouncilor/FeatureServer/0/query?f=json&objectIds=" +
           id +
-          "&outFields=Black_African%2CColoured%2CFirst_Name%2CImageLink%2CIndian_or_Asian%2CSurname%2CWardNo%2CWhite%2CProjects_Count%2CBudget_Amount%2CProjects_Count%2CPop_Percentage%2CBudget_Percentage%2COBJECTID&outSR=102100&returnGeometry=false&spatialRel=esriSpatialRelIntersects";
+          "&outFields=Black_African%2CColoured%2CFirst_Name%2CImageLink%2CIndian_or_Asian%2CSurname%2CWardNo%2CWhite%2CProject_Count%2CBudget_Amount%2CPop_Percentage%2CBugdet_Percentage_Rounded%2COBJECTID&outSR=102100&returnGeometry=false&spatialRel=esriSpatialRelIntersects";
         const loadingIndicatorEl = document.getElementById("loadingIndicator");
         const wardDetailsEl = document.getElementById("wardDetails");
 
@@ -585,13 +586,13 @@
                 attributes.Pop_Percentage
               );
               document.getElementById("wardBudgetPercValue").textContent = formatNumber(
-                attributes.Budget_Percentage
+                attributes.Bugdet_Percentage_Rounded
               );
               document.getElementById("wardBudgetValue").textContent = formatAmount(
                 attributes.Budget_Amount
               );
               document.getElementById("wardProjectsValue").textContent = formatNumber(
-                attributes.Projects_Count
+                attributes.Project_Count
               );
 
               if (attributes.WardNo == randomWardNo) {
