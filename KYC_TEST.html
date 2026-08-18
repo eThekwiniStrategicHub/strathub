@@ -535,101 +535,79 @@
         });
       });
 
-function loadCouncillorDetails(id, event) {
-    const url =
-        `https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourWardCouncilor/FeatureServer/0/query` +
-        `?f=json` +
-        `&objectIds=${id}` +
-        `&outFields=Black_African,Coloured,First_Name,ImageLink,Indian_or_Asian,Surname,WardNo,White,Project_Count,Budget_Amount,Pop_Percentage,Bugdet_Percentage,OBJECTID` +
-        `&outSR=102100` +
-        `&returnGeometry=false`;
+      function loadCouncillorDetails(id, event) {
+        const url =
+          "https://services3.arcgis.com/HO0zfySJshlD6Twu/arcgis/rest/services/KnowYourWardCouncilor/FeatureServer/0/query?f=json&objectIds=" +
+          id +
+          "&outFields=Black_African%2CColoured%2CFirst_Name%2CImageLink%2CIndian_or_Asian%2CSurname%2CWardNo%2CWhite%2CProject_Count%2CBudget_Amount%2CPop_Percentage%2CBugdet_Percentage_Rounded%2COBJECTID&outSR=102100&returnGeometry=false&spatialRel=esriSpatialRelIntersects";
+        const loadingIndicatorEl = document.getElementById("loadingIndicator");
+        const wardDetailsEl = document.getElementById("wardDetails");
 
-    const loadingIndicatorEl = document.getElementById("loadingIndicator");
-    const wardDetailsEl = document.getElementById("wardDetails");
+        loadingIndicatorEl.classList.remove("hidden");
 
-    loadingIndicatorEl.classList.remove("hidden");
-
-    const xhttp = new XMLHttpRequest();
-
-    xhttp.onreadystatechange = function () {
-        if (this.readyState === 4 && this.status === 200) {
+        const xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
             try {
-                const data = JSON.parse(this.responseText);
+              const data = JSON.parse(this.responseText);
+              const attributes = data.features[0].attributes;
+              let firstName = attributes.First_Name;
+              let surname = attributes.Surname;
+              if (!firstName || firstName == "null") {
+                firstName = "N/A";
+              }
 
-                if (!data.features || data.features.length === 0) {
-                    console.error("No feature returned for ObjectID:", id);
-                    loadingIndicatorEl.classList.add("hidden");
-                    return;
-                }
+              if (!surname || surname == "null") {
+                surname = "";
+              }
 
-                const attributes = data.features[0].attributes;
+              const valueElements = document.getElementsByClassName("ward-councillor-value");
 
-                let firstName = attributes.First_Name;
-                let surname = attributes.Surname;
+              for (let i = 0; i < valueElements.length; i++) {
+                valueElements[i].textContent = firstName + " " + surname;
+              }
 
-                if (!firstName || firstName === "null") {
-                    firstName = "N/A";
-                }
+              document.getElementById("wardNumberValue").textContent = attributes.WardNo;
+              document.getElementById("wardCouncillorImg").src = attributes.ImageLink;
+              document.getElementById("wardAfricanValue").textContent = formatNumber(
+                attributes.Black_African
+              );
+              document.getElementById("wardIndianValue").textContent = formatNumber(
+                attributes.Indian_or_Asian
+              );
+              document.getElementById("wardColouredValue").textContent = formatNumber(
+                attributes.Coloured
+              );
+              document.getElementById("wardWhiteValue").textContent = formatNumber(
+                attributes.White
+              );
+              document.getElementById("wardPopulation").textContent = formatNumber(
+                attributes.Pop_Percentage
+              );
+              document.getElementById("wardBudgetPercValue").textContent = formatNumber(
+                attributes.Bugdet_Percentage_Rounded
+              );
+              document.getElementById("wardBudgetValue").textContent = formatAmount(
+                attributes.Budget_Amount
+              );
+              document.getElementById("wardProjectsValue").textContent = formatNumber(
+                attributes.Project_Count
+              );
 
-                if (!surname || surname === "null") {
-                    surname = "";
-                }
+              if (attributes.WardNo == randomWardNo) {
+                randomWardLoaded = true;
+              }
 
-                const valueElements =
-                    document.getElementsByClassName("ward-councillor-value");
-
-                for (let i = 0; i < valueElements.length; i++) {
-                    valueElements[i].textContent =
-                        `${firstName} ${surname}`.trim();
-                }
-
-                document.getElementById("wardNumberValue").textContent =
-                    attributes.WardNo;
-
-                document.getElementById("wardCouncillorImg").src =
-                    attributes.ImageLink || "";
-
-                document.getElementById("wardAfricanValue").textContent =
-                    formatNumber(attributes.Black_African);
-
-                document.getElementById("wardIndianValue").textContent =
-                    formatNumber(attributes.Indian_or_Asian);
-
-                document.getElementById("wardColouredValue").textContent =
-                    formatNumber(attributes.Coloured);
-
-                document.getElementById("wardWhiteValue").textContent =
-                    formatNumber(attributes.White);
-
-                document.getElementById("wardPopulation").textContent =
-                    formatNumber(attributes.Pop_Percentage);
-
-                document.getElementById("wardBudgetPercValue").textContent =
-                    formatNumber(attributes.Bugdet_Percentage);
-
-                document.getElementById("wardBudgetValue").textContent =
-                    formatAmount(attributes.Budget_Amount);
-
-                document.getElementById("wardProjectsValue").textContent =
-                    formatNumber(attributes.Project_Count);
-
-                if (attributes.WardNo == randomWardNo) {
-                    randomWardLoaded = true;
-                }
-
-                loadingIndicatorEl.classList.add("hidden");
-                wardDetailsEl.classList.remove("hidden");
-
+              loadingIndicatorEl.classList.add("hidden");
+              wardDetailsEl.classList.remove("hidden");
             } catch (error) {
-                console.error("Error retrieving councillor details:", error);
-                loadingIndicatorEl.classList.add("hidden");
+              console.error("Error retrieving councillor details", error);
             }
-        }
-    };
-
-    xhttp.open("GET", url, true);
-    xhttp.send();
-}
+          }
+        };
+        xhttp.open("GET", url);
+        xhttp.send();
+      }
 
       function initWardSelectionPopup() {
         let htmlContent = "";
